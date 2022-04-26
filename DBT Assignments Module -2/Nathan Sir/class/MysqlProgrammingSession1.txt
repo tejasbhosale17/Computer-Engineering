@@ -1,0 +1,442 @@
+DBT
+1) DBMS
+
+2) SQL 
+
+3) MYSQL PROGRAMMING
+    Sql + programming construct
+
+4) MONGODB
+
+
+C programming
+  
+variable
+data types
+control statement
+conditional statement
+
+java
+
+select * from emp;
+
+select * from emp where empno = 7859;
+
+select * from emp where sal>40000
+
+select 
+update
+delete
+insert
+
+
+if
+if else 
+if else if
+
+if(sal>4000)
+  comm = sal*0.1;
+else if(sal>4000 and sal<5000)
+  comm = sal*0.2;
+
+
+
+java
+  programming consturct
+
+   Result rs =  select * from emp;
+   while(rs.next)
+   {
+
+    rs.getint()
+
+   }
+
+  data get from table
+  do logic
+  disp on the screen
+  update to the table
+ 
+using java
+
+variable int i =10;
+         int j = 20;
+    sum = i+j;
+    
+select * from emp where empno = 7859;
+
+advanced java
+  jsp
+   
+get data from user 
+  update to the table
+
+------------------------------------------------------------------------------------------
+
+mysql programming
+
+    stored procedure 
+
+    stored function
+
+    stored triggers
+
+- store it on data base
+
+
+Advantage
+
+- it reduces the network traffic
+
+
+create procedure empdetails()
+begin
+
+  select * from emp;
+  select empcode,empname from emp;
+  update emp set sal = sal+100;
+
+end
+
+call empdetails()
+  - mysql client
+  - invoke from java
+
+-----------------------------------------------------------------
+
+2) save lots of time
+     - recompilation will not happend every time you call the procedure
+
+3) centralized control of the logic
+
+4) secure
+
+5) modularity -maintain
+
+
+-------------------------------------------------------------------------------------------
+
+function method are same
+   set of instrction 
+           specific task
+
+
+findmax(int a,int b,in  )
+{
+
+  
+}
+scannf("%d", &a,&b,&c,)
+findmax(a,b,c)
+
+
+function
+   name , parameter
+
+   return value
+
+
+-----------------------------------------------------------------------------------------
+mysql programming
+
+  stored procedure
+  stored function
+     has to be created on server
+     it has to be invoked by the user
+
+  trigger
+   based on event trigger get called automatically
+
+------------------------------------------------------------------------------------------
+
+user defined function- which you create on any languge
+-------------------------------------------------------------------------------------------
+
+strored procedure
+
+create procedure <name of the procedure>(int a,int b)
+begin
+
+variable
+data type
+if
+if else
+sql statement
+
+end;
+
+call <procedure_name>(10,20)
+
+--------------------------------------------------------------------------------------------
+1) hello world program 
+
+2) start intract with data base using sql
+
+delimiter ;
+
+delimiter
+
+drop procedure if exists sayHello;
+
+
+create procedure sayHello()
+begin
+
+select 'welcome' as output;
+
+end//
+
+delimiter ;
+
+call sayHello();
+
+delimiter //
+drop procedure if exists findsum//
+create procedure findsum()
+begin
+
+declare x int default 10;
+declare y int default 20;
+declare total int default 0;
+set total = x+y;
+select total;
+
+end //
+
+call findsum()//
+
+
+hello world
+data type variable
+int- integer
+string - varchar(20);
+decimal(5,2)
+price 50.30
+
+declare sum int default=0
+
+--------------------------------------------------------------------------------------
+
+procedure can take parameter
+
+three kind of parameter
+
+
+IN - caller send data to the procdure
+
+OUT- procedure can data back to caller 
+
+INOUT
+
+
+call has responsibility to send the the data
+
+
+int add(int a, int b)
+{
+
+    int total = a+b;
+    return total;
+
+}
+
+main()
+{
+int tot =add(10,20)
+}
+
+delimiter //
+drop procedure if exists findsum//
+create procedure findsum(in x int, in y int)
+begin
+declare total int default 0;
+set total = x+y;
+select total;
+end //
+
+call findsum(10,20)//
+
+
+
+
+delimiter //
+
+drop procedure if exists findsum//
+
+create procedure findsum(in x int, in y int, out total int)
+begin
+set total = x+y;
+end //
+
+set @total = 0//
+call findsum(10,20,@total)//
+select @total//
+
+4 to 4.15 pm
+
+in 
+out 
+inout
+
+intracting with data base
+   mysql- emp
+
+- sql
+
+
+delimiter //
+
+drop procedure selectAllEmployee//
+create procedure selectAllEmployee()
+begin
+
+select * from emp where empno = 7934;
+update emp set sal = sal+100 where empno = 7934;
+select * from emp where empno = 7934;
+
+end//
+
+call selectAllEmployee()//
+
+find  employee of perticuler empno;
+
+delimiter //
+drop procedure findEmployee//
+create procedure findEmployee(in eno int)
+begin
+
+select * from emp where empno = eno;
+
+end//
+
+call findEmployee(7934)//
+
+------------------------------------------------------------------
+
+count the no of employee from perticuler dept
+
+delimiter //
+drop procedure findnoEmployee//
+
+create procedure findnoEmployee(in dno int)
+begin
+
+select count(*) from emp where deptno = dno;
+
+
+end//
+
+call findnoEmployee(20)//
+
+
+
+-----------------------------------
+used select into - statement
+
+
+delimiter //
+drop procedure findnoEmployee//
+
+create procedure findnoEmployee(in dno int , out totalno int)
+begin
+
+select count(*) into totalno from emp where deptno = dno;
+
+end//
+
+set @totalno = 0//
+
+call findnoEmployee(10, @totalno)//
+
+
+---------------------------------------------------------------------------------------
+
+
+delimiter //
+drop procedure findnoEmployee//
+
+create procedure findnoEmployee(in dno int,out no int)
+begin
+
+select count(*) into no   from emp where deptno = dno;
+    
+end//
+
+
+set @no = 0//
+call findnoEmployee(20,@no)//
+select @no//
+
+
+------------------------------------------------------------
+delimiter //
+drop procedure findmaxsalEmployee//
+
+create procedure findmaxsalEmployee(in dno int,out name varchar(20),out esal int)
+begin
+
+select ename, sal into name,esal from emp where sal=(select max(sal) from emp where deptno = dno);
+    
+end//
+
+set @name = ''//
+
+set @esal = 0//
+call findmaxsalEmployee(10,@name,@esal)//
+select @name,@esal//
+
+
+select ename sal from emp where sal=(select max(sal) from emp where deptno = no);
+
+
+
+out
+
+cursor
+
+function
+
+
+
+
+
+
+select max(sal) from emp where deptno = 20
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

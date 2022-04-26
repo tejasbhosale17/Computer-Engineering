@@ -1,0 +1,456 @@
+
+
+				mysql programming - day 2
+
+mysql programming
+
+ - sql+programming construct
+
+java
+
+python
+
+php
+
+
+stored procedure
+    - specific task
+      set of instruction related to  
+stored function
+
+stored trigger
+
+advantage
+
+
+java
+
+ how to write function
+
+main()
+{
+
+insertdata()
+selectdata()
+updatedata()
+
+}
+
+
+stored procedure 
+
+create procedure getEmployee(in eno int,out name varchar(20))
+begin
+
+  -  data type
+  -  variable
+
+     declare name varchar(30)
+
+     set name = "nathan";
+     
+  -  if
+  -  while
+  -  select 
+
+end;
+
+
+mysql> set @name = ' ';
+
+mysql> call getEmployee(1001,@name)
+
+
+In-
+
+out-
+
+inout-
+
+select into
+
+.c 
+main()
+{
+
+
+}
+
+class emp
+{
+
+
+
+}
+
+
+delimiter //
+
+drop procedure if exists getGrade //
+create  procedure getGrade(in sid int)
+begin
+
+declare v_grade varchar(10);
+
+declare class varchar(20);
+
+select grade into v_grade from student where stud_id = sid;
+
+if v_grade = 'A' then
+
+  set class = 'First Class';  
+
+else
+   
+  set class = 'Second Class'; 
+
+end if;
+
+
+select v_grade ,class;
+
+
+end//
+
+call getGrade(1007)//
+
+
+
+------------------------------------------------------------------------
+
+delimiter //
+
+drop procedure if exists getGrade //
+create  procedure getGrade(in sid int, out v_grade varchar(10), out class varchar(20))
+begin
+
+select grade into v_grade from student where stud_id = sid;
+
+if v_grade = 'A' then
+
+  set class = 'First Class';  
+
+else
+   
+  set class = 'Second Class'; 
+
+end if;
+
+end//
+
+call getGrade(1007)//
+
+
+
+stud_id | total_marks | grade class
+--------+-------------+-------
+   1001 |         450 | A     first class
+   1002 |         480 | A+    second class
+   1003 |         490 | A++   first class
+   1004 |         440 | B+    third class
+   1005 |         380 | C
+   1007 |         250 | D
+   1008 |         200 | E
+
+
+to intract data base
+
+  select into 
+
+    - if the query return single row
+
+  cursor
+
+    - if the query return more than one row
+    - iterator
+    - result set
+
+
+---------------------------------------------------------------------------------------------
+
+inout
+
+  - works like in- sending  out for receiving
+
+ 
+
+delimiter //
+
+drop procedure if exists getGrade //
+
+create  procedure getGrade(inout var int)
+begin
+
+select total_marks into var from student where stud_id = var;
+
+end//
+
+set @var = 1007 //
+
+call getGrade(@var)//
+
+select @var //
+
+
+
+show procedure status where db = 'edacmay2021'//
+show procedure status like 'find%' //
+
+In
+Out
+inout
+
+if
+if else
+
+
+cursor
+ 
+cursor is a iterator which help to interate the result set
+
+
+if the query return more than one row 
+  you have use cursor to handle the data inside the procedure
+
+
+
+delimiter //
+
+drop procedure if exists getGrade //
+create  procedure getGrade(in v_grade varchar(10), out v_id int)
+begin
+
+select stud_id into v_id from student where grade  = v_grade;
+
+
+end//
+
+set @grade = 'A'//
+set @sid = 0//
+call getGrade(@grade , @sid)//
+
+select @sid//
+
+
+
+1) declare cursor and define what column to fetch
+
+2) open cursor
+
+loop:emp
+
+ fetch c1  - store into local variable
+
+  do logic
+
+end loop
+
+close c1;
+
+
+------------------------------------------------------------------------------------------------------
+
+
+delimiter //
+
+drop procedure if exists findclass//
+
+create  procedure findclass(in id int)
+begin
+
+declare sid int;
+
+declare tmark int;
+
+declare gra varchar(20);
+
+declare class varchar(20);
+
+declare c1 cursor for select stud_id,total_marks,grade from student where stud_id = id;
+
+open c1;
+
+
+
+fetch c1 into sid,tmark,gra;
+
+   if gra = 'A' then
+    set class = 'First';
+   else
+    set class = 'Second';
+   end if;
+
+select sid,tmark,gra;
+ 
+close c1;
+
+end//
+
+call findclass(1003)//
+
+
+------------------------------------------------------------------------------------------------------
+multiple row
+
+delimiter //
+
+drop procedure if exists findclass//
+
+create  procedure findclass()
+begin
+
+declare sid int;
+
+declare done int default 0;
+
+declare tmark int;
+
+declare gra varchar(20);
+
+declare v_class varchar(20);
+
+declare c1 cursor for select stud_id,total_marks,grade from student; 
+
+declare continue handler for not found set done = 1;
+
+open c1;
+
+stu: loop 
+
+fetch c1 into sid,tmark,gra;
+
+if done = 1 then
+
+leave stu;
+
+end if;
+
+if gra = 'A++' then
+  
+  set v_class = 'SUPER ';
+
+ELSEIF gra = 'A' then
+
+  set v_class = 'FIRST ';
+
+ELSE
+
+  set v_class = 'SECOND';
+
+end if;
+
+update student set class = v_class where stud_id = sid;
+ 
+select sid,tmark,gra,v_class;
+
+end loop;
+
+ 
+close c1;
+
+end//
+
+call findclass()//
+
+
+
+stored function
+
+-----------------------------------------------------------------------------------------------------------
+procedure 
+
+function
+
+
+exception
+triggers
+
+---------------------------------------------------------------------------------------------------------
+
+alter table student 
+add column class varchar(20)// 
+     
+
+
+
+-----------------------------------------------------------------------------------------------------
+stored procedure
+- through out parameter we get data to the caller
+
+
+Stored function should return value from the caller
+
+return statement
+
+can take parameter
+
+sum(sal)
+
+adding two numbers 
+
+who is having max sal from perticuler dept
+
+delimiter //
+
+drop function if exists addnumber//
+create function addnumber(x int , y int) returns int deterministic
+begin
+declare tot int;
+set tot = x + y;
+return tot;
+end //
+
+call addnumber(4,5)//
+
+delimiter //
+drop function if exists findmax//
+create function findmax(dno int) returns int deterministic
+begin
+
+declare  v_max int ; 
+
+select max(sal) into v_max from emp where deptno = dno;
+return v_max;
+end //
+
+select findmax(20)//
+
+inout
+
+cursor
+
+function
+
+exception
+trigger
+------------------------------------------------------------------------------------------------------------
+
+mongodb
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,100 @@
+					Assignment 6 TCL
+
+Q1.--->
+ 
+QUERIES:---
+
+create table course(course_id int primary key, course_name varchar(20));
+start transaction;
+insert into course values(1,'DBT');
+insert into course values(2,'OS');
+insert into course values(3,'JAVA');
+insert into course values(4,'Data Structure');
+select * from course;
+savepoint insertion;
+delete from course where course_name='DBT';
+delete from course where course_name='OS';
+savepoint deletion;
+rollback to deletion;
+insert into course values(5,'Algorithms');
+select * from course;
+rollback to insertion;
+select * from course;
+rollback;
+------------------------------------------------------------------------------------------
+
+OUTPUT:---
+
+mysql> create table course(course_id int primary key, course_name varchar(20));
+Query OK, 0 rows affected (0.08 sec)
+
+mysql> start transaction;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> insert into course values(1,'DBT');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> insert into course values(2,'OS');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into course values(3,'JAVA');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into course values(4,'Data Structure');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from course;
++-----------+----------------+
+| course_id | course_name    |
++-----------+----------------+
+|         1 | DBT            |
+|         2 | OS             |
+|         3 | JAVA           |
+|         4 | Data Structure |
++-----------+----------------+
+4 rows in set (0.00 sec)
+
+mysql> savepoint insertion;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> delete from course where course_name='DBT';
+Query OK, 1 row affected (0.00 sec)
+
+mysql> delete from course where course_name='OS';
+Query OK, 1 row affected (0.00 sec)
+
+mysql> savepoint deletion;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> rollback to deletion;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> insert into course values(5,'Algorithms');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from course;
++-----------+----------------+
+| course_id | course_name    |
++-----------+----------------+
+|         3 | JAVA           |
+|         4 | Data Structure |
+|         5 | Algorithms     |
++-----------+----------------+
+3 rows in set (0.00 sec)
+
+mysql> rollback to insertion;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select * from course;
++-----------+----------------+
+| course_id | course_name    |
++-----------+----------------+
+|         1 | DBT            |
+|         2 | OS             |
+|         3 | JAVA           |
+|         4 | Data Structure |
++-----------+----------------+
+4 rows in set (0.00 sec)
+
+mysql> rollback;
+Query OK, 0 rows affected (0.00 sec)

@@ -1,0 +1,291 @@
+								Assignment 4 Triggers
+
+Q.1 & Q2--->
+Queries:---
+
+drop trigger if exists jd_older;
+delimiter //
+create trigger jd_older after insert
+on emp
+for each row
+if timestampdiff(year,NEW.joindate,curdate()) >40 then
+signal sqlstate '50001' set message_text = 'employee must not be older than 40.';
+end if;
+//
+select empname, timestampdiff(year,joindate,curdate()) from emp where timestampdiff(year,joindate,curdate())<40;
+insert into emp(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay) values ('7888', 'Ruma',  'ACCT', '2021-12-12', '1999-07-17', 'M', 'PRES',  null,  'GC1', 'GL1', 32000);
+insert into emp(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay) values ('8000', 'Tejas',  'ACCT', '1960-12-12', '1970-07-17', 'M', 'PRES',  null,  'GC1', 'GL1', 32000);
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+OUTPUT:-----
+
+mysql> drop trigger if exists jd_older;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> delimiter //
+mysql> create trigger jd_older after insert
+    -> on emp
+    -> for each row
+    -> if timestampdiff(year,NEW.joindate,curdate()) >40 then
+    -> signal sqlstate '50001' set message_text = 'employee must not be older than 40.';
+    -> end if;
+    -> //
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> insert into emp(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay) values ('7888', 'Ruma',  'ACCT', '2021-12-12', '1999-07-17', 'M', 'PRES',  null,  'GC1', 'GL1', 32000);
+    -> //
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into emp(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay) values ('8000', 'Tejas',  'ACCT', '1960-12-12', '1970-07-17', 'M', 'PRES',  null,  'GC1', 'GL1', 32000);
+    -> //
+ERROR 1644 (50001): employee must not be older than 40.
+mysql>
+
+=============================================================================================================================================================================================================================================
+
+Q.3,Q4 & Q5 --->
+
+Queries:-----
+drop table if exists average_age;
+
+create table average_age(avg_age int);
+INSERT INTO average_age SELECT AVG(timestampdiff(year,birthdate,curdate())) FROM emp;	
+select * from average_age;
+
+delimiter //
+drop trigger if exists trig_avage//
+create trigger trig_avage after insert 
+on emp
+for each row
+update average_age set avg_age = (select avg(timestampdiff(year,birthdate,curdate())) from emp);
+//
+
+select * from average_age;
+insert into emp(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay) 
+values ('7223', 'Mohan',  'ACCT', '1990-12-12', '2000-07-17', 'M', 'PRES',  null,  'GC1', 'GL1', 32000);
+
+insert into emp(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay) values ('8000', 'Tejas',  'ACCT', '1999-02-17', '2010-07-17', 'M', 'PRES',  null,  'GC1', 'GL1', 20000);
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Output:-----
+
+mysql> drop table if exists average_age;
+    ->
+    -> create table average_age(avg_age int);
+    -> INSERT INTO average_age SELECT AVG(timestampdiff(year,birthdate,curdate())) FROM emp;
+    -> //
+Query OK, 0 rows affected (0.02 sec)
+
+Query OK, 0 rows affected (0.06 sec)
+
+Query OK, 1 row affected (0.06 sec)
+Records: 1  Duplicates: 0  Warnings: 0
+
+mysql> select * from average_age;
+    -> //
++---------+
+| avg_age |
++---------+
+|      57 |
++---------+
+1 row in set (0.00 sec)
+
+mysql> delimiter //
+mysql> drop trigger if exists trig_avage//
+Query OK, 0 rows affected, 1 warning (0.01 sec)
+
+mysql> create trigger trig_avage after insert
+    -> on emp
+    -> for each row
+    -> update average_age set avg_age = (select avg(timestampdiff(year,birthdate,curdate())) from emp);
+    -> //
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> select * from average_age;
+    -> insert into emp(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay)
+    -> values ('7223', 'Mohan',  'ACCT', '1990-12-12', '2000-07-17', 'M', 'PRES',  null,  'GC1', 'GL1', 32000);
+    ->
+    -> insert into emp(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay) values ('8000', 'Tejas',  'ACCT', '1999-02-17', '2010-07-17', 'M', 'PRES',  null,  'GC1', 'GL1', 20000);
+    -> //
++---------+
+| avg_age |
++---------+
+|      57 |
++---------+
+1 row in set (0.00 sec)
+
+Query OK, 1 row affected (0.04 sec)
+
+Query OK, 1 row affected (0.05 sec)
+
+mysql> select * from average_age;
+    -> //
++---------+
+| avg_age |
++---------+
+|      54 |
++---------+
+1 row in set (0.00 sec)
+=============================================================================================================================================================================================================================================
+
+Q6.& Q7--->
+
+Queries:---
+
+delimiter //
+drop trigger if exists emp_trigger//
+CREATE TRIGGER emp_trigger BEFORE UPDATE
+ON emp
+FOR EACH ROW
+if timestampdiff(year,NEW.birthdate,curdate()) <18 then 
+SIGNAL SQLSTATE '50001' SET MESSAGE_TEXT = 'employee must be older than 18.';
+END IF; 
+//
+
+update emp set empcode='8000', empname='Tejas', deptcode='SALE', birthdate='2010-02-11', joindate='2011-03-15', sex='M', desigcode='SLMN', supcode=7839, gradecode='GC1', gradelevel='GL2', basicpay=20000;   
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+OUTPUT:----
+
+mysql> delimiter //
+mysql> drop trigger if exists emp_trigger//
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> CREATE TRIGGER emp_trigger BEFORE UPDATE
+    -> ON emp
+    -> FOR EACH ROW
+    -> if timestampdiff(year,NEW.birthdate,curdate()) <18 then
+    -> SIGNAL SQLSTATE '50001' SET MESSAGE_TEXT = 'employee must be older than 18.';
+    -> END IF;
+    -> //
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> update emp set empcode='8000', empname='Tejas', deptcode='SALE', birthdate='2010-02-11', joindate='2011-03-15', sex='M', desigcode='SLMN', supcode=7839, gradecode='GC1', gradelevel='GL2', basicpay=20000;
+    -> //
+ERROR 1644 (50001): employee must be older than 18.
+mysql>
+=====================================================================================================================================================================================================================
+
+Q8,Q9,Q10,Q11 & Q12 ----->
+
+Queries:---
+drop table if exists emp_archives;
+create table emp_archives(empcode varchar(15), empname varchar(60), deptcode varchar(15),birthdate date  not null, joindate date  not null, sex char(1) check (sex in ('M', 'F', 'T')),desigcode varchar(15), supcode varchar(15), gradecode varchar(15),gradelevel varchar(30), basicpay integer);
+insert into emp_archives(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay) values ('8000', 'Tejas',  'ACCT', '1999-02-17', '2010-07-17', 'M', 'PRES',  null,  'GC1', 'GL1', 20000);
+select * from emp_archives;
+
+delimiter //
+drop trigger if exists del_row//
+create trigger del_row before delete
+on emp
+for each row
+insert into emp_archives(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay) values(old.empcode,old.empname,old.deptcode,old.birthdate,old.joindate,old.sex,old.desigcode,old.supcode,old.gradecode,old.gradelevel,old.basicpay);
+//
+select * from emp_archives;
+delimiter ;
+select * from emp limit 8,1;
+delete from emp where empcode=7782;
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+OUTPUT:---
+
+
+mysql> drop table if exists emp_archives;
+Query OK, 0 rows affected, 1 warning (0.01 sec)
+
+mysql> create table emp_archives(empcode varchar(15), empname varchar(60), deptcode varchar(15),birthdate date  not null, joindate date  not null, sex char(1) check (sex in ('M', 'F', 'T')),desigcode varchar(15), supcode varchar(15), gradecode varchar(15),gradelevel varchar(30), basicpay integer);
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> insert into emp_archives(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay) values ('8000', 'Tejas',  'ACCT', '1999-02-17', '2010-07-17', 'M', 'PRES',  null,  'GC1', 'GL1', 20000);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from emp_archives;
++---------+---------+----------+------------+------------+------+-----------+---------+-----------+------------+----------+
+| empcode | empname | deptcode | birthdate  | joindate   | sex  | desigcode | supcode | gradecode | gradelevel | basicpay |
++---------+---------+----------+------------+------------+------+-----------+---------+-----------+------------+----------+
+| 8000    | Tejas   | ACCT     | 1999-02-17 | 2010-07-17 | M    | PRES      | NULL    | GC1       | GL1        |    20000 |
++---------+---------+----------+------------+------------+------+-----------+---------+-----------+------------+----------+
+1 row in set (0.00 sec)
+mysql> delimiter //
+mysql> drop trigger if exists del_row//
+Query OK, 0 rows affected, 1 warning (0.01 sec)
+
+mysql> create trigger del_row before delete
+    -> on emp
+    -> for each row
+    -> insert into emp_archives(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay) values(old.empcode,old.empname,old.deptcode,old.birthdate,old.joindate,old.sex,old.desigcode,old.supcode,old.gradecode,old.gradelevel,old.basicpay);
+    -> //
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> select * from emp_archives;
+    -> delimiter ;
+    -> select * from emp limit 8,1;
+    -> //
++---------+---------+----------+------------+------------+------+-----------+---------+-----------+------------+----------+
+| empcode | empname | deptcode | birthdate  | joindate   | sex  | desigcode | supcode | gradecode | gradelevel | basicpay |
++---------+---------+----------+------------+------------+------+-----------+---------+-----------+------------+----------+
+| 8000    | Tejas   | ACCT     | 1999-02-17 | 2010-07-17 | M    | PRES      | NULL    | GC1       | GL1        |    20000 |
++---------+---------+----------+------------+------------+------+-----------+---------+-----------+------------+----------+
+1 row in set (0.00 sec)
+
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'delimiter ;select * from emp limit 8,1' at line 1
+mysql> select * from emp_archives;
+    -> //
++---------+---------+----------+------------+------------+------+-----------+---------+-----------+------------+----------+
+| empcode | empname | deptcode | birthdate  | joindate   | sex  | desigcode | supcode | gradecode | gradelevel | basicpay |
++---------+---------+----------+------------+------------+------+-----------+---------+-----------+------------+----------+
+| 8000    | Tejas   | ACCT     | 1999-02-17 | 2010-07-17 | M    | PRES      | NULL    | GC1       | GL1        |    20000 |
++---------+---------+----------+------------+------------+------+-----------+---------+-----------+------------+----------+
+1 row in set (0.00 sec)
+
+mysql> select * from emp limit 8,1;
+    -> //
++---------+---------+----------+------------+------------+------+-----------+---------+-----------+------------+----------+
+| empcode | empname | deptcode | birthdate  | joindate   | sex  | desigcode | supcode | gradecode | gradelevel | basicpay |
++---------+---------+----------+------------+------------+------+-----------+---------+-----------+------------+----------+
+| 7782    | Menon   | ACCT     | 1967-08-30 | 1981-06-09 | M    | MNGR      | 7839    | GC6       | GL2        |    12400 |
++---------+---------+----------+------------+------------+------+-----------+---------+-----------+------------+----------+
+1 row in set (0.04 sec)
+
+mysql> delimiter ;
+mysql> delete from emp where empcode=7782;
+ERROR 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails (`dac_dbt`.`emp`, CONSTRAINT `emp_ibfk_3` FOREIGN KEY (`supcode`) REFERENCES `emp` (`empcode`))
+mysql>
+
+
+=============================================================================================================================================================================================================================================
+
+Q13 & Q14. ------>
+
+Queries:-----
+delimiter //
+drop trigger if exists after_del_row//
+create trigger after_del_row after delete
+on emp
+for each row
+update average_age set avg_age= (select avg(timespacediff(year,birthdate,curdate())));
+//
+
+select * from average_age;
+delimiter ;
+delete from emp where empcode=9902;
+select * from average_age;
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
