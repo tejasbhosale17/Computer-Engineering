@@ -1,0 +1,74 @@
+1- Example for rollback and savepoint
+
+CREATE TABLE test1(test_id INT NOT NULL PRIMARY KEY) ENGINE=InnoDB;
+START TRANSACTION;
+INSERT INTO test1 VALUES(1);
+INSERT INTO test1 VALUES(2);
+INSERT INTO test1 VALUES(3);
+INSERT INTO test1 VALUES(4);
+SELECT * FROM test1;
+SAVEPOINT insertion;
+delete from test1 where test_id=2;
+delete from test1where test_id=3;
+savepoint deletion;
+SELECT * FROM test1;
+ ROLLBACK TO insertion;
+SELECT * FROM test1;
+INSERT INTO test1 VALUES(5);
+rollback to deletion;
+SELECT * FROM test1;
+ rollback;
+
+
+
+
+-----------------------------------------
+DCL
+
+CREATE USER 'CDAC'@'localhost' IDENTIFIED BY 'cdac123';
+
+system mysql -u CDAC -p
+
+select user();
+
+
+CREATE USER 'CDAC'@'localhost' IDENTIFIED BY 'cdac123'
+  PASSWORD EXPIRE INTERVAL 180 DAY
+  FAILED_LOGIN_ATTEMPTS 3 PASSWORD_LOCK_TIME 2;
+
+CREATE ROLE app_developer;
+CREATE ROLE app_read;
+CREATE ROLE app_write;
+
+
+GRANT ALL ON dac_dbt_2022.* TO 'app_developer';
+GRANT SELECT ON dac_dbt_2022.* TO 'app_read';
+GRANT INSERT, UPDATE, DELETE ON dac_dbt_2022.* TO 'app_write';
+
+
+
+CREATE USER 'dev1'@'localhost' IDENTIFIED BY 'dev1pass';
+CREATE USER 'read_user1'@'localhost' IDENTIFIED BY 'read_user1pass';
+CREATE USER 'read_user2'@'localhost' IDENTIFIED BY 'read_user2pass';
+CREATE USER 'rw_user1'@'localhost' IDENTIFIED BY 'rw_user1pass';
+
+
+
+GRANT 'app_developer' TO 'dev1'@'localhost';
+GRANT 'app_read' TO 'read_user1'@'localhost', 'read_user2'@'localhost';
+GRANT 'app_read', 'app_write' TO 'rw_user1'@'localhost';
+
+
+
+SHOW GRANTS;
+SHOW GRANTS FOR CURRENT_USER;
+SHOW GRANTS FOR CURRENT_USER();
+
+GRANT GRANT OPTION ON dac_dbt_2022.* TO 'admin'@'localhost';
+
+
+
+
+
+
+

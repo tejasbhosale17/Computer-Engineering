@@ -1,0 +1,203 @@
+----------------------------
+
+Trigger Syntax
+CREATE TRIGGER <trigger name> <trigger time > <trigger event>
+ON <table name>
+FOR EACH ROW
+<trigger body>;
+
+
+
+
+
+
+------------------------------------
+TRIGGER
+
+CREATE TABLE test_trigger (percent INT, date DATETIME);
+delimiter $
+CREATE TRIGGER bi_t BEFORE INSERT ON test_trigger
+FOR EACH ROW BEGIN
+SET NEW.date = CURRENT_TIMESTAMP;
+IF NEW.percent < 0 THEN
+SET NEW.percent = 0;
+ELSEIF NEW.percent > 100 THEN
+SET NEW.percent = 100;
+END IF;
+END$
+delimiter ;
+
+SELECT * FROM test_trigger;
+
+
+INSERT INTO test_trigger (percent) VALUES(-2); 
+INSERT INTO test_trigger (percent) VALUES(30);
+INSERT INTO test_trigger (percent) VALUES(120);
+SELECT * FROM test_trigger;
+For attempts to insert a percentage value that lies outside the range from 0 to 100,
+the trigger converts the value to the nearest endpoint.
+
+The trigger automatically provides a value of CURRENT_TIMESTAMP for the
+DATETIME column. In effect, this works around the limitation that a column’s default
+value must be a constant, and implements TIMESTAMP-like automatic initialization
+for a DATETIME column.
+
+
+mysql> INSERT INTO test_trigger (percent) VALUES(-2); DO SLEEP(2);
+mysql> INSERT INTO test_trigger (percent) VALUES(30); DO SLEEP(2);
+mysql> INSERT INTO test_trigger (percent) VALUES(120);
+
+
+----------------------------------------------------------------------------------------------------------
+
+
+Craete trigger to count no of employees
+
+delimiter $
+CREATE TRIGGER T2 after insert on emp 
+
+for each row
+begin
+declare tno int ;
+select count(*) into tno from emp ;
+end $
+delimiter ;
+
+
+IF NEW.age < 18 THEN
+--------------
+Delete trigger
+
+DROP TRIGGER <trigger name>;
+DROP TRIGGER IF EXISTS <trigger name>;
+
+-----------------
+CREATE A TRIGGER TO CHECK EMPLOYEE SHOULD BE OLDER THAN 18
+
+delimiter //
+CREATE TRIGGER emp_trigger BEFORE INSERT
+ON emp
+FOR EACH ROW
+if timestampdiff(year,NEW.birthdate,curdate()) <18 then 
+
+SIGNAL SQLSTATE '50001' SET MESSAGE_TEXT = 'employee must be older than 18.';
+END IF; //
+delimiter ;
+
+select empname,timestampdiff(year,birthdate,curdate()) as age from emp where timestampdiff(year,birthdate,curdate()) <18;
+
+insert into emp(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay) 
+values ('7888', 'Ruma',  'ACCT', '2021-12-12', '2021-07-17', 'M', 'PRES',  null,  'GC1', 'GL1', 32000);
+
+
+SQLSTATE value can indicate errors, warnings, or “not found.” 
+
+
+-----------------------------------------------------------------------
+Create an AFTER INSERT Trigger
+
+CREATE TABLE average_age (average double);
+
+INSERT INTO average_age SELECT AVG(timestampdiff(year,birthdate,curdate())) FROM emp;	
+
+Create an AFTER INSERT trigger on the person table to update the average_age table after insert
+
+delimiter $
+CREATE TRIGGER emp_ai AFTER INSERT
+ON emp
+FOR EACH ROW
+UPDATE average_age SET average = (SELECT AVG(timestampdiff(year,birthdate,curdate())) FROM emp); 
+$
+
+
+delimiter ;
+
+select * from average_age;
+
+insert into emp(empcode,empname,deptcode,birthdate,joindate,sex,desigcode,supcode,gradecode,gradelevel,basicpay) 
+values ('7223', 'Mohan',  'ACCT', '2000-12-12', '2000-07-17', 'M', 'PRES',  null,  'GC1', 'GL1', 32000);
+
+
+
+------------------------------
+
+Create a BEFORE UPDATE Trigger
+
+Add a BEFORE UPDATE trigger to the person table with the same body as the BEFORE INSERT trigger:
+
+delimiter //
+CREATE TRIGGER emp_bu BEFORE UPDATE
+ON emp
+FOR EACH ROW
+if timestampdiff(year,NEW.birthdate,curdate()) <18 then 
+SIGNAL SQLSTATE '50002' SET MESSAGE_TEXT = 'Person must be older than 18.';
+END IF; //
+delimiter ;
+
+
+
+delimiter //
+CREATE TRIGGER emp_bu BEFORE UPDATE
+ON emp
+FOR EACH ROW
+if timestampdiff(year,NEW.birthdate,curdate()) <18 then 
+SIGNAL SQLSTATE '22222' SET MESSAGE_TEXT = 'Person must be older than 18.';
+END IF; //
+delimiter ;
+
+
+
+update emp set birthdate='2010-12-12' where empcode='7223';
+ERROR 1644 (50002): Person must be older than 18.
+
+-----------------------------------
+Create a BEFORE DELETE Trigger
+
+ Create a table called person with name and age for columns.
+
+CREATE TABLE person (name varchar(45), age int);
+
+Insert sample data into the table:
+
+INSERT INTO person VALUES ('Matthew', 25), ('Mark', 20);
+INSERT INTO person VALUES ('John', 14);
+
+Select the table to see the result:
+
+SELECT * FROM person;
+
+Create a table called person_archive with name, age, and time columns:
+
+CREATE TABLE person_archive (
+name varchar(45),
+age int,
+time timestamp DEFAULT NOW());
+
+delimiter //
+CREATE TRIGGER person_bd BEFORE DELETE
+ON person
+FOR EACH ROW
+INSERT INTO person_archive (name, age)
+VALUES (OLD.name, OLD.age); //
+delimiter ;
+
+
+
+DELETE FROM person WHERE name = 'John';
+
+
+----------------------------
+After delete trigger
+
+delimiter //
+CREATE TRIGGER emp_ad AFTER DELETE
+ON emp
+FOR EACH ROW
+UPDATE average_age SET average = (SELECT AVG(timestampdiff(year,birthdate,curdate())) FROM emp); //
+delimiter ;
+
+
+delete from emp where empcode='7123';
+
+-------------------------
+
